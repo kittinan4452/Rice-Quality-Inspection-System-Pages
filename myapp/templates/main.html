@@ -1,0 +1,229 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Mali:ital,wght@0,200;1,600&family=Mitr:wght@600&family=Noto+Sans+Thai+Looped:wght@100&family=Noto+Sans+Thai:wght@100&display=swap" rel="stylesheet">
+    <link href="{% static 'output/output.css' %}" rel="stylesheet">
+    <link href="{% static 'output/style.css' %}" rel="stylesheet">
+    {% block title %}
+    {% endblock %}
+</head>
+<body class="bg-[#F6F6F6]" >
+    <hedder >
+      <nav class="bg-[#A73B24] fixed  w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+            <span class="self-center text-5xl font-semibold whitespace-nowrap text-white ">RICE</span>
+        </a>
+        <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+            {% block navunlock %}
+            {% endblock %}
+            <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 " aria-controls="navbar-sticky" aria-expanded="false">
+              <span class="sr-only">Open main menu</span>
+              <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+              </svg>
+          </button>
+        </div>
+        <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+          <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg  md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 bg-[#A73B24]">
+            <li>
+              <a href="/" class="block py-2 px-3 text-white  rounded md:bg-transparent  md:p-0 " aria-current="page">หน้าแรก</a>
+            </li>
+            <li>
+              <a href="/showlist" class="block py-2 px-3 text-white rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-[#F7FFE0] md:p-0 md:dark:hover:text-white   md:dark:hover:bg-transparent ">หน้ารายการที่ตรวจแล้ว</a>
+            </li>
+          </ul>
+        </div>
+        </div>
+      </nav>
+     </header>
+     {% block breadcrumb  %}
+        {% endblock %}
+        {% block content %}
+        {% endblock %}
+    
+<footer class=" bottom-0 left-0 z-20 pt-11  w-full p-4 bg-[#A73B24] border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 ">
+ 
+  <span class="text-sm  text-white sm:text-center dark:text-white">© 2024 <a href="https://flowbite.com/" class="hover:underline">RICE</a>
+  </span>
+  <ul class="flex flex-wrap items-center mt-3 justify-between text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
+      <li>
+          <a href="/" class="    me-4 md:me-6 text-white">หน้าแรก</a>
+      </li>
+      <li>
+          <a href="showlist" class="   me-4 md:me-6 text-white">หน้ารายการที่ตรวจแล้ว</a>
+      </li>
+  </ul>
+
+</div>
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById("myModal");
+        
+        // Get the image and insert it inside the modal - use its "alt" text as a caption
+        var img = document.getElementById("myImg");
+        var modalImg = document.getElementById("img01");
+        var captionText = document.getElementById("caption");
+        img.onclick = function(){
+          modal.style.display = "block";
+          modalImg.src = this.src;
+          captionText.innerHTML = this.alt;
+        }
+        
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+        
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() { 
+          modal.style.display = "none";
+        }
+        </script>
+        <script>
+          var loadFile = function(event) {
+              
+              var input = event.target;
+              var file = input.files[0];
+              var type = file.type;
+    
+             var output = document.getElementById('preview_img');
+    
+    
+              output.src = URL.createObjectURL(event.target.files[0]);
+              output.onload = function() {
+                  URL.revokeObjectURL(output.src) // free memory
+              }
+          };
+      
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+    // เพิ่มอีเวนต์ change ใน select
+    document.getElementById("selectOption").addEventListener("change", renderImage);
+});
+
+function renderImage() {
+    var selected = document.getElementById("selectOption");
+    var imgUrl = "";
+
+    if (selected.value == 1) {
+        imgUrl = "{{ datatype.image1.url }}";
+    } else if (selected.value == 2) {
+        imgUrl = "{{ datatype.image2.url }}";
+    }
+    else if (selected.value == 3) {
+        imgUrl = "{{ datatype.image3.url }}";
+    }
+    else if (selected.value == 4) {
+        imgUrl = "{{ datatype.image4.url }}";
+    } 
+    else if (selected.value == 5) {
+        imgUrl = "{{ datatype.image5.url }}";
+    } 
+    else {
+        imgUrl = "{{ datatype.image1.url }}";
+    }
+
+    document.getElementById("myImg").src = imgUrl;
+}
+    </script>
+        <style>
+          body {font-family: Arial, Helvetica, sans-serif;}
+          
+          #myImg {
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+          }
+          
+          #myImg:hover {opacity: 0.7;}
+          
+          /* The Modal (background) */
+          .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+          }
+          
+          /* Modal Content (image) */
+          .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+          }
+          
+          /* Caption of Modal Image */
+          #caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            height: 150px;
+          }
+          
+          /* Add Animation */
+          .modal-content, #caption {  
+            -webkit-animation-name: zoom;
+            -webkit-animation-duration: 0.6s;
+            animation-name: zoom;
+            animation-duration: 0.6s;
+          }
+          
+          @-webkit-keyframes zoom {
+            from {-webkit-transform:scale(0)} 
+            to {-webkit-transform:scale(1)}
+          }
+          
+          @keyframes zoom {
+            from {transform:scale(0)} 
+            to {transform:scale(1)}
+          }
+          
+          /* The Close Button */
+          .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+          }
+          
+          .close:hover,
+          .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+          }
+          
+          /* 100% Image Width on Smaller Screens */
+          @media only screen and (max-width: 700px){
+            .modal-content {
+              width: 100%;
+            }
+          }
+          </style>
+
+</body>
+</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.6.5/sweetalert2.all.min.js"></script>
+{% load sweetify %}
+{% sweetify %}

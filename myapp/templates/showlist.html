@@ -1,0 +1,140 @@
+{% extends "main.html"%}
+{% block title %}
+    <title>รายการ</title>
+    {% endblock %}
+    {% block navunlock %}
+
+    <a href="#"> <button type="button" class="text-gray-900 bg-white border border-gray-300 focus:outline-none  focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2  readonly ">ยินดีต้อนรับ, {{ username }}</button></a>
+    <a href="singout"><button type="button" class="text-white bg-red-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-800 focus:outline-none dark:focus:ring-blue-800">Logout</button></a>
+    {% endblock %}
+    {% block breadcrumb %}
+    <div class="container-main">
+<nav class="flex mt-24 mb-4" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+      <li class="inline-flex items-center">
+        <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 ">
+          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+          </svg>
+          หน้าแรก
+        </a>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <a href="showlist" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 ">หน้ารายการที่ตรวจแล้ว</a>
+        </div>
+      </li>
+     
+    </ol>
+  </nav>
+
+    </div>
+    {% endblock %}
+    {% block content %}
+    
+    <div class="container-main min-h-screen"> 
+      <div class="relative overflow-x-auto sm:rounded-lg mt-9 p-6 bg-white shadow-2xl ">
+            <div class="pb-4 bg-white ">
+      <label for="table-search" class="sr-only">Search</label>
+      
+        
+      
+  </div>
+  <table class="w-full text-sm text-left rtl:text-right text-gray-500 ">
+      <thead class="text-xs text-white uppercase bg-[#A73B24]">
+          <tr>
+            <th scope="col" class="px-6 py-3">
+              ID
+          </th>
+              <th scope="col" class="px-6 py-3">
+                  ชื่อผู้ขาย
+              </th>
+              <th scope="col" class="px-6 py-3">
+                  ทะเบียนรถ
+              </th>
+              <th scope="col" class="px-6 py-3">
+                  เบอร์โทรศัพท์
+              </th>
+              <th scope="col" class="px-6 py-3">
+                ขนิดข้าว
+              </th>
+              <th scope="col" class="px-6 py-3">
+                รายละเอียด
+            </th>
+              <th scope="col" class="px-6 py-3">
+                  ลบ
+              </th>
+          </tr>
+      </thead>
+      <tbody>
+        {% for dataperson in dataperson %}
+          <tr class="bg-white border border-[#A73B24] ">
+            <th scope="col" class="px-6 py-3">
+              {{dataperson.id}}
+          </th>
+              <th scope="row" class="px-6 py-4 ">
+                {{dataperson.name}}
+              </th>
+              <td class="px-6 py-4">
+                {{dataperson.register}}
+              </td>
+              <td class="px-6 py-4">
+                {{dataperson.member}}
+              </td>
+              <td class="px-6 py-4">
+                {{dataperson.type_rice}}
+              </td>
+              <td class="px-6 py-4">
+                <a href="showdata/{{dataperson.id}}" type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">รายละเอียด</a>
+            </td>
+              <td class="px-6 py-4">
+                  <a href="deletedata/{{dataperson.id}}" type="button" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Delete</a>
+              </td>
+              
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+  <nav aria-label="Page navigation example">
+    {% if dataperson.has_other_pages %}
+    <ul class="inline-flex -space-x-px text-base h-10">
+        {% if dataperson.has_previous %}
+        <li>
+          <a href="?page={{ dataperson.previous_page_number }}" class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-white bg-[#A73B24] border border-e-0 border-gray-300 rounded-s-lg hover:bg-[#995A5A]  ">Previous</a>
+        </li>
+      {% else %}
+        <li >
+          <span disabled class="flex items-center justify-center px-4 h-10 ms-0 leading-tight  border border-e-0 text-white border-[#A73B24] bg-[#A73B24] rounded-s-lg ">Previous</span>
+        </li>
+      {% endif %}
+      
+
+      {% for i in dataperson.paginator.page_range %}
+      {% if dataperson.number == i %}
+        <span class="current">
+          <a href="#" class="flex items-center justify-center px-4 h-10 text-white border border-gray-300 bg-[#995A5A] hover:bg-[#995A5A]   ">{{ i }}</a>
+        </span>
+      {% else %}
+        <a href="?page={{ i }}" class="flex items-center justify-center px-4 h-10 leading-tight text-white  border border-gray-300  hover:bg-[#995A5A] bg-[#A73B24] ">{{ i }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if dataperson.has_next %}
+      <li>
+        <a href="?page={{ dataperson.next_page_number }}" class="flex items-center justify-center px-4 h-10 leading-tight text-white  border border-gray-300  hover:bg-[#995A5A] bg-[#A73B24]">Next</a>
+      </li>
+      {% else %}
+      <li>
+        <span disabled class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-white  border border-e-0 border-gray-300 rounded-r-lg bg-[#A73B24] ">Next</span>
+      </li>
+      {% endif %}
+    </ul>
+    {% endif %}
+  </nav>
+</div>
+
+</div>
+
+    {% endblock %}
