@@ -16,8 +16,7 @@
 ``` bash
 git clone https://github.com/kittinan4452/Rice-Quality-Inspection-System-Pages.git
 ```
-ขั้นตอนที่ 2 เปิดโปรแกรม Anaconda สร้าง Environment โดยเลือกใช้ภาษา Python 
-ขั้นตอนที่ 3 ทำการเปิดโปรแกรม Visual Studio Code ผ่านตัวโปรแกรม Anaconda VM
+ขั้นตอนที่ 2 เปิดโปรแกรม Anaconda สร้าง Environment โดยเลือกใช้ภาษา Python จากนั้นทำการเปิดโปรแกรม Visual Studio Code ผ่านตัวโปรแกรม Anaconda VM
 ขั้นตอนที่ 4 เข้าไปในโฟลเดอร์ Rice-Quality-Inspection-System-Pages
 ```bash
 cd Rice-Quality-Inspection-System-Pages
