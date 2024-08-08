@@ -35,6 +35,9 @@ git clone https://github.com/kittinan4452/Rice-Quality-Inspection-System-Pages.g
 cd Rice-Quality-Inspection-System-Pages
 cd Myapp
 ```
-
-ขั้นตอนที่ 5 
+ขั้นตอนที่ 5 ทำการติดตั้ง Packages library ที่จะใช้ในโปรแกรม
+```bash
+pip install -r requirements.txt
+pip list
+```
 ขั้นตอนที่ 5 
