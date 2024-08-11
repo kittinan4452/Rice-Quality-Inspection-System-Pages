@@ -1,4 +1,4 @@
-# Project-Rice-Quality-Inspection-System 
+# Project-Rice-Quality-Inspection-System (MCV)
 ## Rice Quality Inspection System หรือ ระบบตรวจสอบคุณภาพของข้าว
 โครงการนี้มีจุดประสงค์เพื่อนำเทคโนโลยี  machine learning  และ  image processing  มาใช้ในการช่วยตรวจสอบคุณภาพข้าวให้มีความสะดวกสบายและมีความแม่นยำมากยิ่งขึ้น  
 ## Member
@@ -40,4 +40,48 @@ cd Myapp
 pip install -r requirements.txt
 pip list
 ```
-ขั้นตอนที่ 5 
+ขั้นตอนที่ 6 สร้าง Database ตามชื่อที่ต้องการสร้าง จากนั้นแก้ไขไฟล์ setting.py  
+```bash
+|-myapp- 
+|-myproject
+       |-__pycache__
+       |-__init__.py
+       |-asgi.py
+       |-settings.py
+       |-urls.py 
+       |-wsgi.py 
+|-node_modules
+|-resources
+|-static/images
+```
+เปิดไฟล์ settings.py เพื่อแก้ไขไฟล์ NAME ชื่อ Database , USER ชื่อ ผู้ใช้งาน , PASSWORD รหัสผ่าน ของผู้ใช้งาน  
+```bash
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'rice-data',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    }
+}
+
+```
+ขั้นตอนที่ 7 ทำการสร้าง Table ใน Database โดยผ่าน migrations ที่สร้างไว้เรียบร้อย โดยใช้คำสั้ง
+```bash
+python manage.py migrate
+``` 
+ขั้นตอนที่ 8 จากนั้นทำการรัน คำสั่งเพื่อเริ่ม Run Sever Django
+```bash
+python manage.py runserver
+```
+ขั้นตอนที่ 9 เปิดหน้า Web application ผ่าน Browser โดยใช้คำสั่งนี้
+```bash
+http:localhost:5000
+```
+หรือ
+```bash
+http:127.0.0.1:5000
+```
+
