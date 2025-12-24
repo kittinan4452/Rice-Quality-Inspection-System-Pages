@@ -16,7 +16,24 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# settings.py
+# Environment variables
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-^))3b158w#1tr!&0(=*c9(=$vjjsnbn--!-w9^pw3l**-v8pmm')
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
+# Get ALLOWED_HOSTS and strip port numbers if present
+allowed_hosts_raw = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [host.split(':')[0] for host in allowed_hosts_raw]
+
+# Allow all hosts when in DEBUG mode for development
+if DEBUG:
+    ALLOWED_HOSTS.append('*')
+
+# Database configuration
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PORT = os.environ.get('DB_PORT', '3306')
+DB_NAME = os.environ.get('DB_NAME', 'rice-data')
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
 
 
 
@@ -25,12 +42,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^))3b158w#1tr!&0(=*c9(=$vjjsnbn--!-w9^pw3l**-v8pmm'
+# SECRET_KEY is now set from environment variable at the top
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG is now set from environment variable at the top
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS is now set from environment variable at the top
 
 
 # Application definition
@@ -44,12 +61,59 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'sweetify',
-
+    'rest_framework',
+    'corsheaders',
+    'drf_yasg',
 ]
+
+# REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
+}
+
+# CORS configuration for frontend
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000'
+).split(',')
+
+# Allow all origins for development (optional - not recommended for production)
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow all headers for development
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000'
+).split(',')
+
+# Allow CSRF cookie to be sent
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
 SWEETIFY_SWEETALERT_LIBRARY = 'sweetalert2'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,12 +151,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'rice-data',
-        'USER': 'root',
-        'PASSWORD': 'tii123456789',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 
@@ -132,10 +196,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 
-STATIC_URL = "myapp/static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "static"
 STATICFILES_DIRS = [
     BASE_DIR / "myapp/static",
 ]
+
+# Media files (User uploaded content)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "myapp/static"
 
 #LOGIN_REDIRECT_URL = 'loginuser'
 LOGIN_URL='/loginuser/'

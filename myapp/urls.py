@@ -1,13 +1,18 @@
-from django.urls import path
+from django.urls import path, include
 from myapp import views
 from django.contrib.auth.views import (
-    LogoutView, 
-    PasswordResetView, 
-    PasswordResetDoneView, 
+    LogoutView,
+    PasswordResetView,
+    PasswordResetDoneView,
     PasswordResetConfirmView,
     PasswordResetCompleteView
 )
+
 urlpatterns = [
+    # API endpoints
+    path('api/', include('myapp.api_urls')),
+
+    # Legacy template views (for backward compatibility)
     path('',views.index),
     path('AddData',views.AddData),
     path('showlist',views.showlist),
