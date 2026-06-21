@@ -1,0 +1,22 @@
+services:
+  backend:
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn myproject.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    environment:
+      DEBUG: "False"
+      SECRET_KEY: ${SECRET_KEY}
+
+  worker:
+    environment:
+      DEBUG: "False"
+      SECRET_KEY: ${SECRET_KEY}
+
+  nginx:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
