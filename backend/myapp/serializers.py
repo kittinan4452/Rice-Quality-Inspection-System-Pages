@@ -4,9 +4,13 @@ from .models import Dataperson, Data_size, Data_type
 
 
 class InspectionListSerializer(serializers.ModelSerializer):
+    owner_username = serializers.CharField(source='owner.username', read_only=True, default=None)
+    owner_name = serializers.CharField(source='owner.first_name', read_only=True, default=None)
+
     class Meta:
         model = Dataperson
-        fields = ['id', 'name', 'register', 'member', 'type_rice', 'date']
+        fields = ['id', 'name', 'register', 'member', 'type_rice', 'date',
+                  'owner_username', 'owner_name']
 
 
 class DataSizeSerializer(serializers.ModelSerializer):

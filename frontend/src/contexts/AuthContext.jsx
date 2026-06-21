@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
     const { data } = await api.post('/api/auth/login/', { username, password })
     localStorage.setItem('access', data.access)
     localStorage.setItem('refresh', data.refresh)
-    setUser({ username: data.username, first_name: data.first_name })
+    setUser({ username: data.username, first_name: data.first_name, is_staff: data.is_staff })
     return data
   }
 

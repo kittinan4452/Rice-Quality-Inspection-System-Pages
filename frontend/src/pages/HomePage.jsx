@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import api from '../api/axios'
@@ -6,17 +6,21 @@ import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
-const PLACEHOLDER_IMG = 'https://media.istockphoto.com/id/1427450890/th/%E0%B9%80%E0%B8%A7%E0%B8%84%E0%B9%80%E0%B8%95%E0%B8%AD%E0%B8%A3%E0%B9%8C/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%AD%E0%B8%A2%E0%B8%B9%E0%B9%88%E0%B8%9B%E0%B9%89%E0%B8%B2%E0%B8%A2%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%AA%E0%B9%8D%E0%B8%B2%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%84%E0%B8%A7%E0%B9%89%E0%B9%81%E0%B8%A2%E0%B8%81%E0%B8%9E%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88.jpg?s=612x612&w=0&k=20&c=tNK-KR9Kb4dHokDiA8P3fnP5JNFNw2XzY_ioHu1deIk='
-
 export default function HomePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const fileRef = useRef(null)
+  const pollRef = useRef(null)
 
-  const [preview, setPreview] = useState(PLACEHOLDER_IMG)
+  const [preview, setPreview] = useState(null)
   const [form, setForm] = useState({ name: '', register: '', member: '', type_rice: 'ข้าวหอมมะลิ' })
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [statusText, setStatusText] = useState('')
+
+  useEffect(() => {
+    return () => { if (pollRef.current) clearInterval(pollRef.current) }
+  }, [])
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
@@ -27,135 +31,184 @@ export default function HomePage() {
     setPreview(URL.createObjectURL(f))
   }
 
+  const handleDrop = e => {
+    e.preventDefault()
+    const f = e.dataTransfer.files[0]
+    if (!f || !f.type.startsWith('image/')) return
+    setFile(f)
+    setPreview(URL.createObjectURL(f))
+  }
+
   const handleReset = () => {
     setForm({ name: '', register: '', member: '', type_rice: 'ข้าวหอมมะลิ' })
     setFile(null)
-    setPreview(PLACEHOLDER_IMG)
+    setPreview(null)
     if (fileRef.current) fileRef.current.value = ''
   }
 
   const handleSubmit = async e => {
     e.preventDefault()
     if (!file) {
-      Swal.fire({ icon: 'warning', title: 'กรุณาเลือกไฟล์รูปภาพ' })
+      Swal.fire({ icon: 'warning', title: 'กรุณาเลือกรูปภาพ' })
       return
     }
     setLoading(true)
+    setStatusText('กำลังอัพโหลด...')
+
     const fd = new FormData()
     fd.append('file', file)
-    fd.append('name', form.name)
-    fd.append('register', form.register)
-    fd.append('member', form.member)
-    fd.append('type_rice', form.type_rice)
+    Object.entries(form).forEach(([k, v]) => fd.append(k, v))
 
     try {
       const { data } = await api.post('/api/inspections/', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      Swal.fire({ icon: 'success', title: 'ตรวจสอบเสร็จสิ้น', timer: 1500, showConfirmButton: false })
-      navigate(`/inspections/${data.id}`)
+      setStatusText('กำลังวิเคราะห์ภาพด้วย AI...')
+      const taskId = data.task_id
+
+      pollRef.current = setInterval(async () => {
+        try {
+          const { data: taskData } = await api.get(`/api/inspections/task/${taskId}/`)
+          if (taskData.status === 'SUCCESS') {
+            clearInterval(pollRef.current)
+            setLoading(false)
+            setStatusText('')
+            Swal.fire({ icon: 'success', title: 'วิเคราะห์เสร็จสิ้น', timer: 1500, showConfirmButton: false })
+            navigate(`/inspections/${taskData.inspection_id}`)
+          } else if (taskData.status === 'FAILURE') {
+            clearInterval(pollRef.current)
+            setLoading(false)
+            setStatusText('')
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: taskData.error || 'กรุณาลองใหม่อีกครั้ง' })
+          }
+        } catch {
+          clearInterval(pollRef.current)
+          setLoading(false)
+          setStatusText('')
+          Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถตรวจสอบสถานะได้' })
+        }
+      }, 2000)
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.response?.data?.detail || 'กรุณาลองใหม่อีกครั้ง' })
-    } finally {
       setLoading(false)
+      setStatusText('')
+      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.response?.data?.detail || 'กรุณาลองใหม่อีกครั้ง' })
     }
   }
+
+  const inputCls = 'w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors'
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 px-6 pt-28 pb-10">
-        <nav className="mb-6">
-          <ol className="inline-flex items-center space-x-2 text-sm text-gray-600">
-            <li className="font-medium text-gray-800">หน้าแรก</li>
-          </ol>
-        </nav>
+      <main className="flex-1 px-6 pt-24 pb-10 max-w-screen-xl mx-auto w-full">
 
-        <h1 className="text-center text-3xl text-black mb-8">ระบบตรวจสอบข้าว</h1>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">ตรวจสอบคุณภาพข้าว</h1>
+          <p className="text-sm text-gray-500 mt-1">อัพโหลดภาพตัวอย่างข้าวเพื่อวิเคราะห์คุณภาพด้วย AI</p>
+        </div>
 
-        <div className="flex gap-6">
-          {/* Image Preview */}
-          <div className="w-1/2 bg-white shadow-2xl rounded-lg flex flex-col items-center justify-center py-8 px-6">
-            <h2 className="text-2xl mb-6">อัพโหลดข้อมูลภาพ</h2>
-            <img
-              src={preview}
-              alt="preview"
-              className="h-96 rounded-xl object-contain"
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Upload zone */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+            <h2 className="text-base font-semibold text-gray-800 mb-4">ภาพตัวอย่าง</h2>
+            <div
+              onDrop={handleDrop}
+              onDragOver={e => e.preventDefault()}
+              onClick={() => !preview && fileRef.current?.click()}
+              className={`flex-1 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-colors cursor-pointer min-h-72
+                ${preview ? 'border-transparent' : 'border-gray-200 hover:border-primary bg-gray-50 hover:bg-primary-light/20'}`}
+            >
+              {preview ? (
+                <img src={preview} alt="preview" className="w-full h-full object-contain rounded-xl max-h-80" />
+              ) : (
+                <div className="text-center px-6 py-10">
+                  <div className="text-4xl mb-3">📷</div>
+                  <p className="text-sm font-medium text-gray-600">คลิกหรือลากไฟล์มาวางที่นี่</p>
+                  <p className="text-xs text-gray-400 mt-1">รองรับ JPG, PNG, WEBP</p>
+                </div>
+              )}
+            </div>
+            {preview && (
+              <button
+                onClick={() => { setPreview(null); setFile(null); if (fileRef.current) fileRef.current.value = '' }}
+                className="mt-3 text-xs text-gray-400 hover:text-red-500 transition-colors"
+              >
+                เปลี่ยนรูปภาพ
+              </button>
+            )}
+            <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
           </div>
 
           {/* Form */}
-          <div className="w-1/2 bg-white shadow-2xl rounded-lg px-8 py-6">
-            <h2 className="text-center text-2xl mb-4">กรอกข้อมูลผู้ขาย</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-base font-semibold text-gray-800 mb-4">ข้อมูลผู้ขาย</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block mb-1 text-sm text-black">ชื่อผู้ขาย</label>
-                  <input
-                    type="text" name="name" value={form.name} onChange={handleChange} required
-                    placeholder="ชื่อผู้ขาย"
-                    className="py-2 px-3 block w-full rounded-lg text-sm border border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">ชื่อผู้ขาย</label>
+                  <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="ชื่อ-นามสกุล" className={inputCls} />
                 </div>
                 <div>
-                  <label className="block mb-1 text-sm text-black">ทะเบียนรถ</label>
-                  <input
-                    type="text" name="register" value={form.register} onChange={handleChange} required
-                    placeholder="ทะเบียนรถ"
-                    className="py-2 px-3 block w-full rounded-lg text-sm border border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">ทะเบียนรถ</label>
+                  <input type="text" name="register" value={form.register} onChange={handleChange} required placeholder="กก 1234" className={inputCls} />
                 </div>
                 <div>
-                  <label className="block mb-1 text-sm text-black">เบอร์โทรศัพท์</label>
-                  <input
-                    type="text" name="member" value={form.member} onChange={handleChange} required
-                    placeholder="เบอร์โทรศัพท์"
-                    className="py-2 px-3 block w-full rounded-lg text-sm border border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">เบอร์โทรศัพท์</label>
+                  <input type="text" name="member" value={form.member} onChange={handleChange} required placeholder="08X-XXX-XXXX" className={inputCls} />
                 </div>
                 <div>
-                  <label className="block mb-1 text-sm text-black">ชื่อผู้ชื้อ</label>
-                  <input
-                    type="text" readOnly value={user?.first_name || ''}
-                    className="py-2 px-3 block w-full rounded-lg text-sm border border-primary bg-slate-200 cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 text-sm text-black">ประเภทข้าว</label>
-                  <select
-                    name="type_rice" value={form.type_rice} onChange={handleChange}
-                    className="py-2 px-3 block w-full rounded-lg text-sm border border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  >
-                    <option>ข้าวหอมมะลิ</option>
-                  </select>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">ชื่อผู้ซื้อ</label>
+                  <input type="text" readOnly value={user?.first_name || ''} className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed`} />
                 </div>
               </div>
 
-              <div className="mt-5">
-                <label className="block mb-1 text-sm font-medium text-gray-900">Upload file photo</label>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">ประเภทข้าว</label>
+                <select name="type_rice" value={form.type_rice} onChange={handleChange} className={inputCls}>
+                  <option>ข้าวหอมมะลิ</option>
+                  <option>ข้าวขาว</option>
+                  <option>ข้าวเหนียว</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">อัพโหลดรูปภาพ</label>
                 <input
                   ref={fileRef}
                   type="file"
                   accept="image/*"
                   onChange={handleFile}
-                  className="block w-full border border-primary rounded-lg text-sm file:bg-primary file:border-0 file:text-white file:me-4 file:py-2 file:px-4 file:cursor-pointer"
+                  className="block w-full text-sm text-gray-500 border border-gray-200 rounded-xl
+                    file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium
+                    file:bg-primary file:text-white file:rounded-l-xl file:cursor-pointer
+                    hover:file:bg-primary-dark transition-colors"
                 />
               </div>
 
-              <div className="flex justify-center gap-4 mt-7">
+              <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-36 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-colors"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 >
-                  {loading ? 'กำลังประมวลผล...' : 'Upload'}
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      {statusText || 'กำลังประมวลผล...'}
+                    </>
+                  ) : 'วิเคราะห์ข้าว'}
                 </button>
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="w-36 py-2.5 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  disabled={loading}
+                  className="px-6 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium rounded-xl disabled:opacity-50 transition-colors"
                 >
-                  Reset
+                  รีเซ็ต
                 </button>
               </div>
             </form>

@@ -4,9 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#A73B24',
-        'primary-hover': '#8B2E1A',
-        'primary-light': '#995A5A',
+        primary: '#15803d',
+        'primary-dark': '#14532d',
+        'primary-light': '#dcfce7',
+        accent: '#ca8a04',
+        'accent-light': '#fef9c3',
       },
       fontFamily: {
         sans: ['Noto Sans Thai', 'sans-serif'],

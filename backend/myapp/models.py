@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from datetime import datetime
@@ -9,6 +10,12 @@ class Dataperson(models.Model):
     member = models.CharField(max_length=100)
     type_rice = models.CharField(max_length=100)
     date = models.DateTimeField(auto_now_add=True)
+    # เจ้าของรายการตรวจ (FK ไปที่ User) ใช้แทนการ filter ด้วย string เดิม
+    owner = models.ForeignKey(
+        User, null=True, blank=True,
+        on_delete=models.CASCADE, related_name='inspections',
+    )
+    # คงไว้เพื่อความเข้ากันได้ย้อนหลัง / backfill (จะเลิกใช้ในอนาคต)
     user_name = models.CharField(max_length=100, default="Guest")
     username = models.CharField(max_length=50 ,default='Null')
     image = models.ImageField(upload_to="static/images",null=True, blank=True)

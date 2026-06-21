@@ -2,8 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import { useAuth } from '../contexts/AuthContext'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -20,53 +18,73 @@ export default function LoginPage() {
       Swal.fire({ icon: 'success', title: `ยินดีต้อนรับ ${data.first_name}`, timer: 1500, showConfirmButton: false })
       navigate('/')
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.response?.data?.detail || 'กรุณาตรวจสอบชื่อผู้ใช้และรหัสผ่าน' })
+      Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: err.response?.data?.detail || 'กรุณาตรวจสอบชื่อผู้ใช้และรหัสผ่าน' })
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center px-6 pt-28 pb-10">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">เข้าสู่ระบบ</h2>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <input
-              type="text"
-              placeholder="Username"
-              required
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className="block w-full px-3 py-2 border border-primary rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-            />
+    <div className="min-h-screen flex">
+      {/* Left panel */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-primary-dark via-primary to-green-400 flex-col items-center justify-center p-12 text-white">
+        <div className="text-7xl mb-6">🌾</div>
+        <h1 className="text-4xl font-bold mb-3">RICE</h1>
+        <p className="text-green-200 text-center text-lg">ระบบตรวจสอบคุณภาพข้าว<br/>ด้วยปัญญาประดิษฐ์</p>
+      </div>
+
+      {/* Right panel */}
+      <div className="flex-1 flex items-center justify-center px-6 bg-white">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <div className="text-4xl lg:hidden mb-2">🌾</div>
+            <h2 className="text-2xl font-bold text-gray-900">เข้าสู่ระบบ</h2>
+            <p className="text-gray-500 text-sm mt-1">ยินดีต้อนรับกลับมา</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">ชื่อผู้ใช้</label>
               <input
-                type="password"
-                placeholder="Password"
+                type="text"
                 required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="block w-full px-3 py-2 border border-primary rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="กรอก Username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">รหัสผ่าน</label>
+              <input
+                type="password"
+                required
+                placeholder="กรอกรหัสผ่าน"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+              />
+            </div>
+
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-xs text-primary hover:underline">ลืมรหัสผ่าน?</Link>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm font-medium disabled:opacity-50 transition-colors"
+              className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-semibold disabled:opacity-50 transition-colors"
             >
-              {loading ? 'กำลังเข้าสู่ระบบ...' : 'Sign in'}
+              {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
             </button>
           </form>
-          <p className="mt-4 text-center text-sm text-gray-600">
+
+          <p className="mt-6 text-center text-sm text-gray-500">
             ยังไม่มีบัญชี?{' '}
-            <Link to="/register" className="text-blue-600 hover:underline">Sign Up</Link>
+            <Link to="/register" className="text-primary font-medium hover:underline">สมัครสมาชิก</Link>
           </p>
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   )
 }

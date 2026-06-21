@@ -19,7 +19,9 @@ ENV/
 *.log
 local_settings.py
 db.sqlite3
+*.sqlite3
 backend/media/
+backend/staticfiles/
 
 # ML weights (ดาวน์โหลดแยก)
 backend/myapp/weights/
@@ -38,6 +40,17 @@ frontend/.env.local
 # ===== OS =====
 .DS_Store
 Thumbs.db
+
+# ===== Celery / Redis =====
+dump.rdb
+celerybeat-schedule
+celerybeat.pid
+
+# ===== YOLO / Ultralytics output =====
+runs/
+
+# ===== สคริปต์ diagnostic ชั่วคราว =====
+backend/diagnose_*.py
 
 # ===== IDE =====
 .vscode/
